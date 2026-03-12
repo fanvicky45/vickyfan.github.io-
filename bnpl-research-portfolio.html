@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BNPL Research Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --slate: #3a3a5c;
+    --mist: #f4f3ef;
+    --warm: #ede9e0;
+    --accent: #c8773a;
+    --accent-light: #f0d9c5;
+    --rule: #d4cfc6;
+    --white: #ffffff;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--mist);
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(244,243,239,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--rule);
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px;
+  }
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem; font-weight: 600;
+    color: var(--ink); text-decoration: none;
+    letter-spacing: 0.02em;
+  }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    font-size: 0.82rem; font-weight: 500; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--slate);
+    text-decoration: none; transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+
+  /* HERO */
+  .hero {
+    padding: 140px 0 80px;
+    max-width: 900px; margin: 0 auto; padding-left: 2rem; padding-right: 2rem;
+  }
+  .hero-label {
+    display: inline-block;
+    font-size: 0.75rem; font-weight: 500; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--accent);
+    border: 1px solid var(--accent); border-radius: 2px;
+    padding: 4px 12px; margin-bottom: 2rem;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-weight: 700; line-height: 1.15;
+    color: var(--ink); margin-bottom: 1.5rem;
+    letter-spacing: -0.01em;
+  }
+  .hero h1 em { font-style: italic; color: var(--accent); }
+  .hero-sub {
+    font-size: 1.1rem; color: var(--slate);
+    max-width: 600px; line-height: 1.8; margin-bottom: 2.5rem;
+  }
+  .hero-meta {
+    display: flex; gap: 2.5rem; flex-wrap: wrap;
+    padding-top: 2rem; border-top: 1px solid var(--rule);
+  }
+  .hero-meta-item { font-size: 0.82rem; }
+  .hero-meta-item span { display: block; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--slate); margin-bottom: 2px; }
+  .hero-meta-item strong { font-family: 'Playfair Display', serif; font-size: 0.95rem; color: var(--ink); }
+
+  /* SECTION WRAPPER */
+  .section { padding: 80px 0; border-top: 1px solid var(--rule); }
+  .container { max-width: 900px; margin: 0 auto; padding: 0 2rem; }
+
+  .section-label {
+    font-size: 0.72rem; font-weight: 500; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 0.6rem;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 600; color: var(--ink);
+    margin-bottom: 1.5rem; line-height: 1.25;
+  }
+  .section-body { color: var(--slate); max-width: 680px; line-height: 1.85; }
+
+  /* CONTEXT CARDS */
+  .stat-row {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5px; margin-top: 3rem;
+    border: 1.5px solid var(--rule); border-radius: 4px; overflow: hidden;
+  }
+  .stat-card {
+    background: var(--white); padding: 2rem 1.8rem;
+  }
+  .stat-card .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem; font-weight: 700;
+    color: var(--accent); line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  .stat-card .stat-desc { font-size: 0.88rem; color: var(--slate); line-height: 1.5; }
+
+  /* RESEARCH QUESTION */
+  .rq-block {
+    background: var(--ink); color: var(--white);
+    border-radius: 4px; padding: 3rem;
+    margin-top: 3rem; position: relative; overflow: hidden;
+  }
+  .rq-block::before {
+    content: '"';
+    font-family: 'Playfair Display', serif;
+    font-size: 12rem; line-height: 1;
+    color: rgba(200,119,58,0.15);
+    position: absolute; top: -1rem; left: 1rem;
+    pointer-events: none;
+  }
+  .rq-block p {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.1rem, 2.5vw, 1.45rem);
+    font-style: italic; line-height: 1.7;
+    position: relative; z-index: 1;
+    margin-bottom: 1.5rem;
+  }
+  .rq-subs { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; position: relative; z-index: 1; }
+  .rq-subs li {
+    font-size: 0.88rem; color: rgba(255,255,255,0.7);
+    padding-left: 1.2rem; position: relative;
+  }
+  .rq-subs li::before {
+    content: '→'; position: absolute; left: 0;
+    color: var(--accent);
+  }
+
+  /* HYPOTHESES */
+  .hyp-grid {
+    display: grid; gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule); border-radius: 4px; overflow: hidden;
+    margin-top: 2.5rem;
+  }
+  .hyp-row {
+    display: grid; grid-template-columns: 60px 1fr auto;
+    align-items: center; gap: 1.5rem;
+    background: var(--white); padding: 1.2rem 1.8rem;
+    transition: background 0.2s;
+  }
+  .hyp-row:hover { background: #faf9f6; }
+  .hyp-code {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem; font-weight: 700; color: var(--accent);
+  }
+  .hyp-desc { font-size: 0.9rem; color: var(--ink); }
+  .hyp-badge {
+    font-size: 0.72rem; font-weight: 500; letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: #d4edda; color: #2d6a4f;
+    border-radius: 2px; padding: 3px 10px; white-space: nowrap;
+  }
+
+  /* METHODOLOGY */
+  .method-flow {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1px; background: var(--rule);
+    border: 1px solid var(--rule); border-radius: 4px; overflow: hidden;
+    margin-top: 2.5rem;
+  }
+  .method-step {
+    background: var(--white); padding: 2rem 1.5rem;
+    position: relative;
+  }
+  .method-step-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem; font-weight: 700;
+    color: var(--accent-light); line-height: 1;
+    margin-bottom: 1rem;
+  }
+  .method-step-title {
+    font-size: 0.82rem; font-weight: 500; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+  .method-step-desc { font-size: 0.82rem; color: var(--slate); line-height: 1.6; }
+
+  /* CHARTS */
+  .charts-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 2rem; margin-top: 3rem;
+  }
+  @media (max-width: 640px) { .charts-grid { grid-template-columns: 1fr; } }
+  .chart-card {
+    background: var(--white);
+    border: 1px solid var(--rule); border-radius: 4px;
+    padding: 1.8rem;
+  }
+  .chart-card.full { grid-column: 1 / -1; }
+  .chart-title {
+    font-size: 0.8rem; font-weight: 500; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--slate);
+    margin-bottom: 1.2rem;
+  }
+  .chart-canvas-wrap { position: relative; height: 220px; }
+  .chart-canvas-wrap.tall { height: 280px; }
+
+  /* FINDINGS */
+  .findings-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem; margin-top: 2.5rem;
+  }
+  .finding-card {
+    background: var(--white);
+    border: 1px solid var(--rule); border-radius: 4px;
+    padding: 1.8rem;
+  }
+  .finding-icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--accent-light); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; margin-bottom: 1rem;
+  }
+  .finding-card h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem; font-weight: 600; color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+  .finding-card p { font-size: 0.85rem; color: var(--slate); line-height: 1.65; }
+
+  /* IMPLICATIONS */
+  .impl-list {
+    display: flex; flex-direction: column; gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule); border-radius: 4px; overflow: hidden;
+    margin-top: 2.5rem;
+  }
+  .impl-item {
+    background: var(--white); padding: 1.4rem 1.8rem;
+    display: flex; gap: 1.2rem; align-items: flex-start;
+    transition: background 0.2s;
+  }
+  .impl-item:hover { background: #faf9f6; }
+  .impl-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem; font-weight: 700; color: var(--accent-light);
+    line-height: 1; flex-shrink: 0; width: 28px;
+  }
+  .impl-text { font-size: 0.9rem; color: var(--ink); line-height: 1.65; }
+
+  /* CONTACT */
+  .contact-section {
+    background: var(--ink); color: var(--white);
+    padding: 80px 0;
+  }
+  .contact-section .section-label { color: var(--accent); }
+  .contact-section .section-title { color: var(--white); }
+  .contact-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 4rem; margin-top: 2.5rem;
+  }
+  @media (max-width: 640px) { .contact-grid { grid-template-columns: 1fr; gap: 2rem; } }
+  .contact-info p { font-size: 0.9rem; color: rgba(255,255,255,0.65); line-height: 1.8; margin-bottom: 2rem; }
+  .contact-detail { display: flex; flex-direction: column; gap: 1rem; }
+  .contact-detail-item { display: flex; flex-direction: column; }
+  .contact-detail-item span { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 2px; }
+  .contact-detail-item a, .contact-detail-item strong { font-size: 0.92rem; color: rgba(255,255,255,0.85); text-decoration: none; }
+  .contact-form { display: flex; flex-direction: column; gap: 1rem; }
+  .contact-form input, .contact-form textarea {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 3px; padding: 0.85rem 1rem;
+    color: var(--white); font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; outline: none; transition: border-color 0.2s;
+    resize: vertical;
+  }
+  .contact-form input::placeholder, .contact-form textarea::placeholder { color: rgba(255,255,255,0.3); }
+  .contact-form input:focus, .contact-form textarea:focus { border-color: var(--accent); }
+  .contact-form textarea { min-height: 120px; }
+  .btn-send {
+    background: var(--accent); color: var(--white);
+    border: none; border-radius: 3px; padding: 0.9rem 2rem;
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+    font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+    cursor: pointer; transition: opacity 0.2s; align-self: flex-start;
+  }
+  .btn-send:hover { opacity: 0.85; }
+
+  /* FOOTER */
+  footer {
+    text-align: center; padding: 2rem;
+    font-size: 0.78rem; color: var(--slate);
+    border-top: 1px solid var(--rule);
+  }
+
+  /* ANIMATIONS */
+  .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 640px) {
+    .nav-links { display: none; }
+    .charts-grid { grid-template-columns: 1fr; }
+    .hyp-row { grid-template-columns: 50px 1fr; }
+    .hyp-badge { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">BNPL Research</a>
+  <ul class="nav-links">
+    <li><a href="#context">Context</a></li>
+    <li><a href="#questions">Questions</a></li>
+    <li><a href="#methods">Methods</a></li>
+    <li><a href="#data">Data</a></li>
+    <li><a href="#findings">Findings</a></li>
+    <li><a href="#implications">Implications</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-label">Academic Research Proposal</div>
+  <h1>BNPL's Causal Impact on<br/><em>Consumer Spending</em> Behavior</h1>
+  <p class="hero-sub">A behavioral and causal analytics study examining how Buy Now, Pay Later reshapes purchase decisions, basket size, and long-term financial outcomes — with implications for payment networks, banks, and merchants.</p>
+  <div class="hero-meta">
+    <div class="hero-meta-item"><span>Field</span><strong>Behavioral Finance & Analytics</strong></div>
+    <div class="hero-meta-item"><span>Focus</span><strong>Gen Z & Digital Payments</strong></div>
+    <div class="hero-meta-item"><span>Method</span><strong>Diff-in-Differences (DiD)</strong></div>
+    <div class="hero-meta-item"><span>Industry Partners</span><strong>Klarna · Afterpay · Affirm · Mastercard</strong></div>
+  </div>
+</section>
+
+<!-- CONTEXT -->
+<section class="section" id="context">
+  <div class="container fade-in">
+    <div class="section-label">01 — Business Context</div>
+    <h2 class="section-title">Why BNPL Matters Now</h2>
+    <p class="section-body">Buy Now, Pay Later has rapidly scaled across e-commerce and digital payments, with Gen Z among the fastest adopters. While most discourse focuses on whether BNPL increases purchases, far fewer studies causally estimate how it affects purchase completion and basket size when controlling for consumer characteristics.</p>
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-num">20%</div>
+        <div class="stat-desc">of UK adults used BNPL in the 12 months to May 2024, up from 17% in 2022</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">18–24</div>
+        <div class="stat-desc">Age group showing highest BNPL reliance and multiple concurrent instalment loans in the US</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">3 gaps</div>
+        <div class="stat-desc">Why BNPL changes behavior, which consumers are most affected, and long-term credit implications remain understudied</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">2x</div>
+        <div class="stat-desc">Behavorial nudge effect: BNPL reshapes payment perception and mental accounting beyond pure credit utility</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESEARCH QUESTIONS -->
+<section class="section" id="questions">
+  <div class="container fade-in">
+    <div class="section-label">02 — Research Questions</div>
+    <h2 class="section-title">What We're Investigating</h2>
+    <p class="section-body">The study is anchored by one primary question, decomposed into three testable sub-questions that align with both academic rigor and managerial relevance.</p>
+    <div class="rq-block">
+      <p>How and why does BNPL change financial spending behavior, and how can businesses use these insights to identify customer segments, improve LTV, and design future payment products aligned with System 1 and System 2 behavioral principles?</p>
+      <ul class="rq-subs">
+        <li>Does BNPL increase purchase conversion and basket size?</li>
+        <li>Which consumer characteristics amplify or weaken BNPL's effects?</li>
+        <li>Are BNPL-driven purchases sustainably profitable or likely to create later financial strain?</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- HYPOTHESES -->
+<section class="section" id="hypotheses">
+  <div class="container fade-in">
+    <div class="section-label">03 — Hypotheses</div>
+    <h2 class="section-title">Five Testable Predictions</h2>
+    <p class="section-body">Derived from behavioral economics and prior BNPL literature, each hypothesis targets a distinct mechanism — conversion, basket size, generational effect, category type, and financial discipline.</p>
+    <div class="hyp-grid">
+      <div class="hyp-row">
+        <div class="hyp-code">H1</div>
+        <div class="hyp-desc">BNPL increases purchase likelihood (conversion)</div>
+        <div class="hyp-badge">Expected ✓</div>
+      </div>
+      <div class="hyp-row">
+        <div class="hyp-code">H2</div>
+        <div class="hyp-desc">BNPL increases basket size ($)</div>
+        <div class="hyp-badge">Expected ✓</div>
+      </div>
+      <div class="hyp-row">
+        <div class="hyp-code">H3</div>
+        <div class="hyp-desc">Stronger effect observed among Gen Z consumers (ages 18–27)</div>
+        <div class="hyp-badge">Expected ✓</div>
+      </div>
+      <div class="hyp-row">
+        <div class="hyp-code">H4</div>
+        <div class="hyp-desc">Stronger effect in hedonic categories: fashion, beauty, accessories, event tickets</div>
+        <div class="hyp-badge">Expected ✓</div>
+      </div>
+      <div class="hyp-row">
+        <div class="hyp-code">H5</div>
+        <div class="hyp-desc">Stronger effect among consumers with lower financial discipline and literacy</div>
+        <div class="hyp-badge">Expected ✓</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- METHODS -->
+<section class="section" id="methods">
+  <div class="container fade-in">
+    <div class="section-label">04 — Methodology</div>
+    <h2 class="section-title">Full Analytics Lifecycle</h2>
+    <p class="section-body">The research follows a four-phase analytics workflow, from descriptive statistics to prescriptive decision tools. Causal identification uses a staggered Difference-in-Differences design exploiting BNPL rollout variation across merchants.</p>
+    <div class="method-flow">
+      <div class="method-step">
+        <div class="method-step-num">01</div>
+        <div class="method-step-title">Descriptive</div>
+        <div class="method-step-desc">Average spending by age; category-level effects; BNPL impact on conversion rates</div>
+      </div>
+      <div class="method-step">
+        <div class="method-step-num">02</div>
+        <div class="method-step-title">Predictive</div>
+        <div class="method-step-desc">Estimate expected spending uplift; model BNPL impact per merchant category</div>
+      </div>
+      <div class="method-step">
+        <div class="method-step-num">03</div>
+        <div class="method-step-title">Causal</div>
+        <div class="method-step-desc">Difference-in-Differences, OLS regressions, Double Machine Learning (DML)</div>
+      </div>
+      <div class="method-step">
+        <div class="method-step-num">04</div>
+        <div class="method-step-title">Prescriptive</div>
+        <div class="method-step-desc">Segmentation recommendations, A/B testing, profitability & LTV assessment</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DATA CHARTS -->
+<section class="section" id="data">
+  <div class="container fade-in">
+    <div class="section-label">05 — Data & Variables</div>
+    <h2 class="section-title">Simulated Dataset Overview</h2>
+    <p class="section-body">Transaction-level payment data linked with checkout-level BNPL exposure across Gen Z (18–27) and older cohorts, controlling for demographics, financial literacy, and product category.</p>
+
+    <div class="charts-grid">
+      <!-- Chart 1: BNPL Adoption by Age Group -->
+      <div class="chart-card">
+        <div class="chart-title">BNPL Adoption Rate by Age Group (%)</div>
+        <div class="chart-canvas-wrap">
+          <canvas id="chart-adoption"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 2: Basket Size with/without BNPL -->
+      <div class="chart-card">
+        <div class="chart-title">Average Basket Size: BNPL vs Standard Payment ($)</div>
+        <div class="chart-canvas-wrap">
+          <canvas id="chart-basket"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 3: Category Effect -->
+      <div class="chart-card full">
+        <div class="chart-title">Expected BNPL Effect by Product Category (Conversion Uplift %)</div>
+        <div class="chart-canvas-wrap tall">
+          <canvas id="chart-category"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 4: Financial Literacy Effect -->
+      <div class="chart-card">
+        <div class="chart-title">BNPL Effect Strength by Financial Literacy Level</div>
+        <div class="chart-canvas-wrap">
+          <canvas id="chart-literacy"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 5: Repayment Outcome -->
+      <div class="chart-card">
+        <div class="chart-title">Projected Repayment Outcomes by Cohort (%)</div>
+        <div class="chart-canvas-wrap">
+          <canvas id="chart-repayment"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINDINGS -->
+<section class="section" id="findings">
+  <div class="container fade-in">
+    <div class="section-label">06 — Expected Findings</div>
+    <h2 class="section-title">What the Evidence Predicts</h2>
+    <p class="section-body">Theory and prior literature predict a consistent pattern: BNPL functions as both a credit instrument and a behavioral nudge, with effects concentrated in specific segments and categories.</p>
+    <div class="findings-grid">
+      <div class="finding-card">
+        <div class="finding-icon">↑</div>
+        <h4>Conversion & Basket Size</h4>
+        <p>BNPL will increase purchase conversion and basket size, particularly among Gen Z shoppers exposed to instalment framing at checkout.</p>
+      </div>
+      <div class="finding-card">
+        <div class="finding-icon">👗</div>
+        <h4>Hedonic Category Effect</h4>
+        <p>Stronger effects in fashion, beauty, accessories, and event tickets — categories tied to identity and emotional purchase motivations.</p>
+      </div>
+      <div class="finding-card">
+        <div class="finding-icon">📉</div>
+        <h4>Financial Literacy Moderates</h4>
+        <p>Low financial literacy and high impulsivity amplify BNPL's effect. High-discipline consumers show near-zero incremental uplift.</p>
+      </div>
+      <div class="finding-card">
+        <div class="finding-icon">📱</div>
+        <h4>Mobile Checkout Amplifier</h4>
+        <p>Mobile checkout environments amplify BNPL's behavioral nudge through reduced friction and System 1-dominant decision contexts.</p>
+      </div>
+      <div class="finding-card">
+        <div class="finding-icon">⚠️</div>
+        <h4>Long-Term Crowd-Out Risk</h4>
+        <p>Short-term spending boosts may cause future demand crowd-out or repayment stress for financially vulnerable users.</p>
+      </div>
+      <div class="finding-card">
+        <div class="finding-icon">🧠</div>
+        <h4>Mental Accounting Shift</h4>
+        <p>BNPL reshapes payment perception — consumers systematically underweight future instalments, distorting effective price sensitivity.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IMPLICATIONS -->
+<section class="section" id="implications">
+  <div class="container fade-in">
+    <div class="section-label">07 — Managerial Implications</div>
+    <h2 class="section-title">Recommendations for Industry</h2>
+    <p class="section-body">Insights from this research help payment networks, banks, and merchants optimize BNPL deployment across the customer lifecycle — balancing conversion uplift with responsible lending practice.</p>
+    <div class="impl-list">
+      <div class="impl-item">
+        <div class="impl-num">1</div>
+        <div class="impl-text">Prioritize BNPL in mid-range hedonic categories (fashion, beauty) where incremental spending is healthy and conversion uplift is highest.</div>
+      </div>
+      <div class="impl-item">
+        <div class="impl-num">2</div>
+        <div class="impl-text">Avoid aggressive BNPL promotion among financially vulnerable consumers — use literacy signals and behavioral flags to gate exposure.</div>
+      </div>
+      <div class="impl-item">
+        <div class="impl-num">3</div>
+        <div class="impl-text">Use behavioral segmentation to target users most responsive to instalment framing, improving marketing ROI and reducing default risk.</div>
+      </div>
+      <div class="impl-item">
+        <div class="impl-num">4</div>
+        <div class="impl-text">Design checkout flows that balance conversion uplift with responsible lending — test friction levels via A/B experimentation.</div>
+      </div>
+      <div class="impl-item">
+        <div class="impl-num">5</div>
+        <div class="impl-text">For platforms like Mastercard, Shopify, and Amazon: determine when BNPL improves long-term customer LTV versus merely shifting demand forward.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact-section" id="contact">
+  <div class="container">
+    <div class="section-label">08 — Contact</div>
+    <h2 class="section-title">Get in Touch</h2>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <p>Interested in this research, collaboration opportunities, or access to the full methodology and dataset documentation? Reach out directly.</p>
+        <div class="contact-detail">
+          <div class="contact-detail-item">
+            <span>Research Area</span>
+            <strong>Behavioral Finance · Digital Payments · Causal Inference</strong>
+          </div>
+          <div class="contact-detail-item">
+            <span>Email</span>
+            <a href="mailto:your@email.com">your@email.com</a>
+          </div>
+          <div class="contact-detail-item">
+            <span>Institution</span>
+            <strong>Your Institution / Programme</strong>
+          </div>
+        </div>
+      </div>
+      <div>
+        <form class="contact-form" onsubmit="handleSubmit(event)">
+          <input type="text" placeholder="Your name" required/>
+          <input type="email" placeholder="Your email" required/>
+          <input type="text" placeholder="Organisation (optional)"/>
+          <textarea placeholder="Your message or enquiry…" required></textarea>
+          <button type="submit" class="btn-send">Send Message</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2025 BNPL Consumer Spending Research · Academic Portfolio</p>
+</footer>
+
+<script>
+// CHART DEFAULTS
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.defaults.color = '#3a3a5c';
+const accent = '#c8773a';
+const accentLight = '#f0d9c5';
+const ink = '#1a1a2e';
+const slate = '#3a3a5c';
+
+// 1. BNPL Adoption by Age Group
+new Chart(document.getElementById('chart-adoption'), {
+  type: 'bar',
+  data: {
+    labels: ['18–24', '25–34', '35–44', '45–54', '55+'],
+    datasets: [{
+      label: 'Adoption Rate (%)',
+      data: [38, 29, 21, 13, 7],
+      backgroundColor: [accent, '#d4895a', '#e0a87a', '#e8c0a0', accentLight],
+      borderRadius: 3, borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { grid: { color: '#ede9e0' }, ticks: { font: { size: 11 } }, max: 50 },
+      x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+    }
+  }
+});
+
+// 2. Basket Size
+new Chart(document.getElementById('chart-basket'), {
+  type: 'bar',
+  data: {
+    labels: ['Gen Z (18–27)', 'Millennials (28–43)', 'Gen X (44–59)'],
+    datasets: [
+      { label: 'Standard Payment', data: [62, 84, 97], backgroundColor: accentLight, borderRadius: 3, borderSkipped: false },
+      { label: 'With BNPL', data: [91, 108, 114], backgroundColor: accent, borderRadius: 3, borderSkipped: false },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 12 } } },
+    scales: {
+      y: { grid: { color: '#ede9e0' }, ticks: { font: { size: 11 } } },
+      x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+    }
+  }
+});
+
+// 3. Category Effect
+new Chart(document.getElementById('chart-category'), {
+  type: 'bar',
+  data: {
+    labels: ['Fashion', 'Beauty', 'Accessories', 'Event Tickets', 'Electronics', 'Home Goods', 'Groceries', 'Utilities'],
+    datasets: [{
+      label: 'Conversion Uplift (%)',
+      data: [28, 24, 22, 19, 12, 9, 4, 2],
+      backgroundColor: (ctx) => ctx.dataIndex < 4 ? accent : accentLight,
+      borderRadius: 3, borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => ` ${ctx.raw}% uplift`
+        }
+      }
+    },
+    scales: {
+      y: { grid: { color: '#ede9e0' }, ticks: { font: { size: 11 }, callback: v => v + '%' } },
+      x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+    }
+  }
+});
+
+// 4. Financial Literacy
+new Chart(document.getElementById('chart-literacy'), {
+  type: 'radar',
+  data: {
+    labels: ['Conversion\nUplift', 'Basket\nGrowth', 'Repayment\nRisk', 'Repeat\nUsage', 'LTV\nImpact'],
+    datasets: [
+      {
+        label: 'Low Financial Literacy',
+        data: [85, 78, 80, 90, 45],
+        borderColor: accent, backgroundColor: 'rgba(200,119,58,0.15)',
+        pointBackgroundColor: accent, borderWidth: 2,
+      },
+      {
+        label: 'High Financial Literacy',
+        data: [22, 18, 15, 25, 70],
+        borderColor: slate, backgroundColor: 'rgba(58,58,92,0.1)',
+        pointBackgroundColor: slate, borderWidth: 2,
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 12 } } },
+    scales: {
+      r: {
+        grid: { color: '#ede9e0' },
+        ticks: { display: false },
+        pointLabels: { font: { size: 10 } },
+        min: 0, max: 100
+      }
+    }
+  }
+});
+
+// 5. Repayment Outcomes
+new Chart(document.getElementById('chart-repayment'), {
+  type: 'doughnut',
+  data: {
+    labels: ['On-time repayment', 'Late (recovered)', 'Default / stress'],
+    datasets: [{
+      data: [68, 22, 10],
+      backgroundColor: [accent, accentLight, '#e0cfc0'],
+      borderWidth: 0, hoverOffset: 6
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    cutout: '65%',
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 12 } }
+    }
+  }
+});
+
+// CONTACT FORM
+function handleSubmit(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector('.btn-send');
+  btn.textContent = 'Message Sent ✓';
+  btn.style.background = '#2d6a4f';
+  setTimeout(() => { btn.textContent = 'Send Message'; btn.style.background = ''; }, 3000);
+}
+
+// FADE IN ON SCROLL
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
